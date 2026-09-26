@@ -13,6 +13,9 @@
     const membersList = document.querySelector('#members');
     const whiteColor = document.querySelector('#white-color');
     const blackColor = document.querySelector('#black-color');
+    const scoreWhite = document.querySelector('#score-white');
+    const scoreBlack = document.querySelector('#score-black');
+    const scoreDraw = document.querySelector('#score-draw');
     const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
     const symbols = {
         w: { p: '♙', r: '♖', n: '♘', b: '♗', q: '♕', k: '♔' },
@@ -21,7 +24,9 @@
     let selected = null;
     let computerTimer = null;
     const STORAGE_KEY = 'chessboard-app-state';
+    const SCORE_KEY = 'chessboard-app-score';
     let audioContext = null;
+    let scores = { white: 0, black: 0, draw: 0 };
 
     window.addEventListener('beforeinstallprompt', event => {
         event.preventDefault();
@@ -83,6 +88,49 @@
         square.dataset.square = `${files[index % 8]}${8 - Math.floor(index / 8)}`;
         square.addEventListener('click', () => selectSquare(square.dataset.square));
     });
+
+    function updateScoreBoard() {
+        scoreWhite.textContent = String(scores.white);
+        scoreBlack.textContent = String(scores.black);
+        scoreDraw.textContent = String(scores.draw);
+    }
+
+    function loadScores() {
+        try {
+            const savedScore = JSON.parse(localStorage.getItem(SCORE_KEY));
+            if (savedScore && typeof savedScore === 'object') {
+                scores.white = Number(savedScore.white) || 0;
+                scores.black = Number(savedScore.black) || 0;
+                scores.draw = Number(savedScore.draw) || 0;
+            }
+        } catch {
+            scores = { white: 0, black: 0, draw: 0 };
+        }
+        updateScoreBoard();
+    }
+
+    function persistScores() {
+        try {
+            localStorage.setItem(SCORE_KEY, JSON.stringify(scores));
+        } catch {
+            // ignore storage failures
+        }
+    }
+
+    function recordGameResult() {
+        if (!game.game_over()) return;
+
+        if (game.in_checkmate()) {
+            const winner = game.turn() === 'w' ? 'Black' : 'White';
+            if (winner === 'White') scores.white += 1;
+            else scores.black += 1;
+        } else if (game.in_draw()) {
+            scores.draw += 1;
+        }
+
+        persistScores();
+        updateScoreBoard();
+    }
 
     function updateStatus(message) {
         const player = game.turn() === 'w' ? 'White player' : 'Black player';
@@ -177,8 +225,15 @@
     }
 
     function showGameStatus() {
-        if (game.in_checkmate()) updateStatus(`${game.turn() === 'w' ? 'Black' : 'White'} wins by checkmate.`);
-        else if (game.in_draw()) updateStatus('Draw. The game is over.');
+        if (game.in_checkmate()) {
+            const winner = game.turn() === 'w' ? 'Black' : 'White';
+            recordGameResult();
+            updateStatus(`${winner} wins by checkmate.\nScore: White ${scores.white} - ${scores.black} Black | Draws ${scores.draw}`);
+        }
+        else if (game.in_draw()) {
+            recordGameResult();
+            updateStatus(`Draw. The game is over.\nScore: White ${scores.white} - ${scores.black} Black | Draws ${scores.draw}`);
+        }
         else if (game.in_check()) updateStatus(`${game.turn() === 'w' ? 'White' : 'Black'} is in check.`);
         else updateStatus();
     }
@@ -243,6 +298,7 @@
         saveGame();
     }));
 
+    loadScores();
     restoreSavedGame();
     renderBoard();
     updateStatus();

@@ -11,227 +11,415 @@
     <link rel="apple-touch-icon" href="chess-icon.svg">
     <title>Chessboard App</title>
     <style>
-        :root { --ink: #25313b; --muted: #68736f; --paper: #fffdf7; --light: #f1dfb6; --dark: #779b78; --accent: #a6543f; --white-piece: #fff; --black-piece: #000; }
-        * { box-sizing: border-box; }
-        body { margin: 0; 
-            min-height: 100vh;
-             padding: 32px 16px;
-              color: var(--ink);
-               background: #e9eee9;
-                font-family: Georgia, serif; }
-        .page { width: min(760px, 100%); 
-            margin: auto;
-             padding: clamp(22px, 5vw, 44px);
-              background: var(--paper); 
-              border: 1px solid #d9dfd8;
-               box-shadow: 12px 12px 0 #cbd8cc; }
-            .app-bar {
-                 display: flex;
-                  justify-content: center;
-                   align-items: center;
-                    gap: 12px; 
-                    margin-bottom: 22px;
-                     font: 700 .72rem Arial, sans-serif; letter-spacing: .1em;
-                      text-transform: uppercase;
-                     }
-            .app-name {
-                 color: var(--accent); 
-                }
-            .install-button {
-                 display: none; 
-                 padding: 8px 10px;
-                  border: 0; color: #fff; 
-                  background: var(--ink); 
-                  font: inherit;
-                   cursor: pointer;
-                    letter-spacing: .04em;
-                     text-transform: none;
-                     }
-            .install-button:hover { 
-                background: var(--accent);
-             }
-        .eyebrow {
-             margin: 0 0 8px;
-             color: var(--accent);
-              font: 700 .72rem Arial, sans-serif; 
-              letter-spacing: .16em;
-               text-transform: uppercase; }
-        h1 { margin: 0; 
-            font-size: clamp(2.4rem, 8vw, 4.4rem); 
-            line-height: .95;
-            color: #247b78;
-            text-align: center;
-            text-shadow: 2px 2px 0 #e6b94f, 4px 4px 0 #a6543f;
-            }
-        .intro { margin: 14px 0 26px;
-             color: var(--muted); 
-             font: 1rem Arial, sans-serif;
-             text-align: center; }
-        .game-layout {
-             display: grid;
-             grid-template-columns: minmax(280px, 1fr) 180px; 
-             gap: 0; align-items: start;
-             }
-                .board-wrap { width: 100%; max-width: 560px; padding: 0; background: transparent; }
-        .board { 
-            display: grid;
-             grid-template-columns: repeat(8, minmax(0, 1fr));
-              grid-template-rows: repeat(8, minmax(0, 1fr));
-               width: 100%; 
-               aspect-ratio: 1 / 1;
-                border: 3px solid #111;
-                 overflow: hidden;
-                  contain: layout paint;
-                 }
-           .square {
-             position: relative;
-              display: grid;
-               place-items: center;
-                min-width: 0; 
-                min-height: 0;
-                 overflow: hidden;
-                  font-family: 'Segoe UI Symbol', 'Noto Sans Symbols 2', serif;
-                   font-size: clamp(1.8rem, 8vw, 4.2rem);
-                    line-height: 1; 
-                    cursor: pointer;
-                     touch-action: manipulation;
-                     }
-        .light { 
-            background: var(--light);
-         }
-        .dark { 
-            background: var(--dark);
-         }
-        .piece-white {
-             color: var(--white-piece); 
-             text-shadow: 1px 2px 0 #000, -1px -1px 0 #777;
-             }
-        .piece-black {
-             color: var(--black-piece);
-              text-shadow: 1px 1px 0 #fff;
-             }
-        .square.selected {
-             outline: 4px solid #e6b94f;
-              outline-offset: -4px;
-             }
-        .square.legal::after { 
-            content: '';
-             width: 18%;
-              aspect-ratio: 1;
-               border-radius: 50%;
-                background: #e6b94f;
-             }
-        .rank, .file {
-             position: absolute;
-              font: 700 .65rem Arial, sans-serif; opacity: .72;
-             }
-        .rank {
-             top: 4px;
-              left: 5px;
-             }
-        .file {
-             right: 5px;
-              bottom: 4px;
-             }
-        .light .rank, .light .file {
-             color: #111;
-             }
-        .dark .rank, .dark .file { 
-            color: #fff; 
+        :root {
+            --bg: #07111f;
+            --bg-2: #0f172a;
+            --panel: rgba(15, 23, 42, 0.88);
+            --panel-soft: rgba(21, 32, 49, 0.9);
+            --line: rgba(148, 163, 184, 0.22);
+            --text: #e2e8f0;
+            --muted: #a5b4c9;
+            --accent: #7dd3fc;
+            --accent-2: #f59e0b;
+            --light: #d8d9c7;
+            --dark: #5c7280;
+            --board-dark: #4f6270;
+            --board-light: #ead9b7;
+            --white-piece: #f8fafc;
+            --black-piece: #0f172a;
         }
-        .panel {
-             padding: 18px;
-              background: #f2f5ef;
-               border-top: 4px solid var(--accent);
-                font-family: Arial, sans-serif;
-             }
-        .panel h2 {
-             margin: 0 0 14px;
-              font-size: 1rem;
-             }
-        .turn {
-             margin: 0 0 18px;
-              color: var(--muted);
-               font-size: .85rem;
-                line-height: 1.45;
-             }
-        .legend {
-             margin: 0;
-              color: var(--muted);
-               font-size: .75rem;
-                line-height: 1.5;
-             }
-        .control-label {
-             display: block;
-              margin: 14px 0 6px;
-               color: var(--muted);
-                font-size: .72rem;
-                 font-weight: 700;
-                  text-transform: uppercase;
-                 }
-        .piece-colors {
-             display: flex;
-              gap: 8px;
-             }
-        .piece-color {
-             display: flex;
-              flex: 1; 
-              align-items: center;
-               gap: 6px;
-                color: var(--muted);
-                 font-size: .72rem;
-                 }
-        .piece-color input {
-             width: 30px;
-              height: 26px;
-               padding: 0;
-                border: 1px solid #cbd5ce;
-                 background: var(--paper);
-                  cursor: pointer; 
-                }
-        .mode, .member-name {
-             width: 100%;
-              padding: 9px;
-               border: 1px solid #cbd5ce;
-                background: var(--paper); 
-                color: var(--ink);
-                 font: .8rem Arial, sans-serif; 
-                }
-        .member-row {
-             display: flex;
-              gap: 5px;
-             }
-        .member-row .member-name {
-             min-width: 0;
-             }
-        .add-member, .reset, .save-game { 
-            padding: 9px 10px;
-             border: 0; color: #fff;
-              background: var(--ink);
-               font: 700 .75rem Arial, sans-serif;
-                cursor: pointer;
-             }
-        .add-member:hover, .reset:hover, .save-game:hover {
-             background: var(--accent);
-             }
-        .game-actions { 
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            padding: 32px 18px;
+            color: var(--text);
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background:
+                radial-gradient(circle at top, rgba(125, 211, 252, 0.18), transparent 35%),
+                linear-gradient(135deg, var(--bg) 0%, var(--bg-2) 40%, #111827 100%);
+        }
+
+        .page {
+            width: min(920px, 100%);
+            margin: 0 auto;
+            padding: clamp(18px, 4vw, 30px);
+            border: 1px solid var(--line);
+            border-radius: 28px;
+            background: rgba(11, 17, 31, 0.7);
+            box-shadow: 0 30px 70px rgba(2, 6, 23, 0.52);
+            backdrop-filter: blur(10px);
+        }
+
+        .app-bar {
             display: flex;
-             gap: 5px; 
-             margin-bottom: 10px;
-             }
-        .game-actions button {
-             flex: 1;
-             }
-        .members { 
-            margin: 9px 0 18px;
-             padding-left: 18px;
-              color: var(--muted);
-               font-size: .78rem; 
-            }
-        .members:empty { 
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--line);
+            font: 700 0.72rem/1 "Segoe UI", sans-serif;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .app-name {
+            color: var(--accent);
+        }
+
+        .install-button {
             display: none;
-         }
-        @media (max-width: 620px) { .game-layout { grid-template-columns: 1fr; } .panel { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px; } .panel h2, .turn { margin: 0; } .legend { grid-column: 1 / -1; } }
+            padding: 9px 14px;
+            border: 1px solid rgba(125, 211, 252, 0.3);
+            border-radius: 999px;
+            color: #03121d;
+            background: linear-gradient(135deg, var(--accent), #bae6fd);
+            font: 700 0.72rem/1 "Segoe UI", sans-serif;
+            letter-spacing: 0.04em;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .install-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(125, 211, 252, 0.2);
+        }
+
+        .eyebrow {
+            margin: 0 0 10px;
+            color: var(--accent-2);
+            font: 700 0.72rem/1 "Segoe UI", sans-serif;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(2.6rem, 7vw, 5rem);
+            line-height: 0.96;
+            text-align: center;
+            letter-spacing: -0.06em;
+            color: #f8fafc;
+            text-shadow: 0 8px 28px rgba(125, 211, 252, 0.3);
+        }
+
+        .intro {
+            margin: 14px auto 28px;
+            max-width: 530px;
+            color: var(--muted);
+            text-align: center;
+            font: 1rem/1.7 "Segoe UI", sans-serif;
+        }
+
+        .game-layout {
+            display: grid;
+            grid-template-columns: minmax(300px, 1.3fr) minmax(220px, 0.7fr);
+            gap: 22px;
+            align-items: start;
+        }
+
+        .board-wrap {
+            width: min(100%, 620px);
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 14px;
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.9), rgba(17, 24, 39, 0.75));
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(8, minmax(0, 1fr));
+            width: 100%;
+            max-width: 100%;
+            aspect-ratio: 1 / 1;
+            border: 2px solid rgba(15, 23, 42, 0.85);
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 14px 30px rgba(15, 23, 42, 0.35), inset 0 0 0 1px rgba(255,255,255,0.07);
+        }
+
+        .square {
+            position: relative;
+            display: grid;
+            place-items: center;
+            width: 100%;
+            height: 100%;
+            aspect-ratio: 1 / 1;
+            min-width: 0;
+            min-height: 0;
+            overflow: hidden;
+            font-family: "Segoe UI Symbol", "Noto Sans Symbols 2", serif;
+            font-size: clamp(1.7rem, 5vw, 4rem);
+            line-height: 1;
+            cursor: pointer;
+            touch-action: manipulation;
+            transition: transform 0.14s ease, filter 0.14s ease;
+        }
+
+        .square:hover {
+            filter: brightness(1.04);
+        }
+
+        .light { background: var(--board-light); }
+        .dark { background: var(--board-dark); }
+
+        .piece-white {
+            color: var(--white-piece);
+            text-shadow: 0 2px 0 rgba(15, 23, 42, 0.8), 0 0 12px rgba(255,255,255,0.25);
+        }
+
+        .piece-black {
+            color: var(--black-piece);
+            text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+        }
+
+        .square.selected {
+            box-shadow: inset 0 0 0 4px rgba(245, 158, 11, 0.9);
+        }
+
+        .square.legal::after {
+            content: "";
+            width: 18%;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background: rgba(245, 158, 11, 0.85);
+            box-shadow: 0 0 0 8px rgba(245, 158, 11, 0.16);
+        }
+
+        .rank, .file {
+            position: absolute;
+            font: 700 0.62rem/1 "Segoe UI", sans-serif;
+            opacity: 0.8;
+            z-index: 1;
+        }
+
+        .rank { top: 5px; left: 6px; }
+        .file { right: 6px; bottom: 5px; }
+
+        .light .rank, .light .file { color: rgba(15, 23, 42, 0.8); }
+        .dark .rank, .dark .file { color: rgba(255, 255, 255, 0.8); }
+
+        .panel {
+            padding: 20px 18px;
+            border: 1px solid var(--line);
+            border-radius: 22px;
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.75), rgba(14, 20, 31, 0.9));
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+            font-family: "Segoe UI", sans-serif;
+        }
+
+        .panel h2 {
+            margin: 0 0 12px;
+            color: var(--text);
+            font-size: 1rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .turn {
+            margin: 0 0 18px;
+            color: var(--muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .score-box {
+            margin: 0 0 18px;
+            padding: 12px 10px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: rgba(15, 23, 42, 0.55);
+        }
+
+        .score-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 6px 4px;
+            color: var(--muted);
+            font-size: 0.82rem;
+        }
+
+        .score-row strong {
+            min-width: 24px;
+            color: var(--text);
+            text-align: right;
+            font-size: 0.9rem;
+        }
+
+        .legend {
+            margin: 0;
+            color: var(--muted);
+            font-size: 0.75rem;
+            line-height: 1.6;
+        }
+
+        .control-label {
+            display: block;
+            margin: 14px 0 7px;
+            color: var(--muted);
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .piece-colors {
+            display: flex;
+            gap: 10px;
+        }
+
+        .piece-color {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex: 1;
+            gap: 8px;
+            padding: 8px 10px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            color: var(--muted);
+            background: rgba(15, 23, 42, 0.6);
+            font-size: 0.72rem;
+        }
+
+        .piece-color input {
+            width: 34px;
+            height: 28px;
+            padding: 0;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        .mode, .member-name {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            background: rgba(15, 23, 42, 0.7);
+            color: var(--text);
+            font: 0.82rem/1.5 "Segoe UI", sans-serif;
+        }
+
+        .member-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .member-row .member-name {
+            min-width: 0;
+        }
+
+        .add-member, .reset, .save-game {
+            padding: 10px 12px;
+            border: 1px solid rgba(125, 211, 252, 0.25);
+            border-radius: 12px;
+            color: #03121d;
+            background: linear-gradient(135deg, var(--accent), #bde9ff);
+            font: 700 0.74rem/1 "Segoe UI", sans-serif;
+            letter-spacing: 0.04em;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .add-member:hover, .reset:hover, .save-game:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 22px rgba(125, 211, 252, 0.15);
+        }
+
+        .game-actions {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .game-actions button {
+            flex: 1;
+        }
+
+        .members {
+            margin: 10px 0 18px;
+            padding-left: 18px;
+            color: var(--muted);
+            font-size: 0.78rem;
+            line-height: 1.9;
+        }
+
+        .members:empty {
+            display: none;
+        }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 16px 12px;
+            }
+
+            .page {
+                padding: 16px 12px 18px;
+                border-radius: 20px;
+            }
+
+            .app-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .game-layout {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .board-wrap {
+                padding: 10px;
+                border-radius: 18px;
+            }
+
+            .panel {
+                padding: 16px 14px;
+                border-radius: 18px;
+            }
+
+            .piece-colors {
+                flex-direction: column;
+            }
+
+            .member-row,
+            .game-actions {
+                flex-direction: column;
+            }
+
+            .members {
+                margin-bottom: 14px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .app-name {
+                font-size: 0.68rem;
+            }
+
+            h1 {
+                font-size: clamp(2.1rem, 13vw, 3.2rem);
+            }
+
+            .intro {
+                font-size: 0.92rem;
+            }
+
+            .square {
+                font-size: clamp(1.35rem, 7vw, 2.5rem);
+            }
+        }
     </style>
 </head>
 <body>
@@ -253,7 +441,7 @@
                     <div class="square dark piece-white" role="gridcell" aria-label="a1 white rook"><span class="file">a</span>♖</div><div class="square light piece-white" role="gridcell" aria-label="b1 white knight"><span class="file">b</span>♘</div><div class="square dark piece-white" role="gridcell" aria-label="c1 white bishop"><span class="file">c</span>♗</div><div class="square light piece-white" role="gridcell" aria-label="d1 white queen"><span class="file">d</span>♕</div><div class="square dark piece-white" role="gridcell" aria-label="e1 white king"><span class="file">e</span>♔</div><div class="square light piece-white" role="gridcell" aria-label="f1 white bishop"><span class="file">f</span>♗</div><div class="square dark piece-white" role="gridcell" aria-label="g1 white knight"><span class="file">g</span>♘</div><div class="square light piece-white" role="gridcell" aria-label="h1 white rook"><span class="file">h</span>♖</div>
                 </div>
             </div>
-            <aside class="panel"><h2>Game status</h2><p class="turn">White's turn.<br>Choose a move to begin.</p><label class="control-label" for="mode">Players</label><select class="mode" id="mode"><option value="human">Human vs Human</option><option value="computer">Play vs Computer</option></select><label class="control-label">Piece colors</label><div class="piece-colors"><label class="piece-color">White <input id="white-color" type="color" value="#ffffff" aria-label="White piece color"></label><label class="piece-color">Black <input id="black-color" type="color" value="#000000" aria-label="Black piece color"></label></div><label class="control-label" for="member-name">Add member</label><div class="member-row"><input class="member-name" id="member-name" type="text" placeholder="Player name"><button class="add-member" type="button">Add</button></div><ul class="members" id="members"></ul><div class="game-actions"><button class="save-game" type="button">Save game</button><button class="reset" type="button">New game</button></div><p class="legend">Game position, mode, members, and piece colors are saved automatically.</p></aside>
+            <aside class="panel"><h2>Game status</h2><p class="turn">White's turn.<br>Choose a move to begin.</p><div class="score-box" aria-live="polite"><div class="score-row"><span>White</span><strong id="score-white">0</strong></div><div class="score-row"><span>Black</span><strong id="score-black">0</strong></div><div class="score-row"><span>Draws</span><strong id="score-draw">0</strong></div></div><label class="control-label" for="mode">Players</label><select class="mode" id="mode"><option value="human">Human vs Human</option><option value="computer">Play vs Computer</option></select><label class="control-label">Piece colors</label><div class="piece-colors"><label class="piece-color">White <input id="white-color" type="color" value="#ffffff" aria-label="White piece color"></label><label class="piece-color">Black <input id="black-color" type="color" value="#000000" aria-label="Black piece color"></label></div><label class="control-label" for="member-name">Add member</label><div class="member-row"><input class="member-name" id="member-name" type="text" placeholder="Player name"><button class="add-member" type="button">Add</button></div><ul class="members" id="members"></ul><div class="game-actions"><button class="save-game" type="button">Save game</button><button class="reset" type="button">New game</button></div><p class="legend">Game position, mode, members, and piece colors are saved automatically.</p></aside>
         </section>
     </main>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js" integrity="sha384-aH7F59TKSh8OEAivbclch9UUnWn/Uy8AQlYYKzpVaQkAp8W6IF2VocW/knEeRwT0" crossorigin="anonymous"></script>
