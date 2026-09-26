@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#25313b"/>
+  <rect x="64" y="64" width="384" height="384" fill="#f1dfb6"/>
+  <path fill="#779b78" d="M64 64h96v96H64zm192 0h96v96h-96zM160 160h96v96h-96zm192 0h96v96h-96zM64 256h96v96H64zm192 0h96v96h-96zM160 352h96v96h-96zm192 0h96v96h-96z"/>
+  <text x="256" y="356" text-anchor="middle" fill="#fffdf7" stroke="#25313b" stroke-width="8" font-size="250" font-family="Georgia,serif">♞</text>
+</svg>

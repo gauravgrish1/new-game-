@@ -1,0 +1,19 @@
+{
+  "name": "Enjoy your chess and play",
+  "short_name": "Chessboard",
+  "description": "A legal-move chess app with computer play and player members.",
+  "start_url": "./index3.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#e9eee9",
+  "theme_color": "#25313b",
+  "icons": [
+    {
+      "src": "chess-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

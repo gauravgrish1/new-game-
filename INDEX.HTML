@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Today | To-Do List</title>
+    <style>
+        :root {
+            --ink: #20262e;
+            --muted: #6c747d;
+            --paper: #fffdf8;
+            --line: #e9e4d9;
+            --accent: #e76f51;
+            --accent-dark: #c95237;
+            --green: #3a8f6b;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--ink);
+            background: #f4efe6;
+            font-family: Georgia, 'Times New Roman', serif;
+        }
+
+        .app {
+            width: min(680px, calc(100% - 32px));
+            margin: 48px auto;
+            padding: clamp(24px, 5vw, 52px);
+            background: var(--paper);
+            border: 1px solid var(--line);
+            box-shadow: 14px 14px 0 #ded6c7;
+        }
+
+        header { border-bottom: 2px solid var(--ink); padding-bottom: 22px; }
+        .eyebrow {
+            margin: 0 0 10px;
+            color: var(--accent-dark);
+            font-family: Arial, sans-serif;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        h1 { margin: 0; font-size: clamp(2.4rem, 8vw, 4.6rem); line-height: 0.95; }
+        .intro { margin: 16px 0 0; color: var(--muted); font-size: 1.05rem; }
+
+        .add-task {
+            display: flex;
+            gap: 10px;
+            margin: 28px 0 20px;
+        }
+
+        input[type="text"] {
+            min-width: 0;
+            flex: 1;
+            padding: 13px 14px;
+            border: 1px solid #cfc7b8;
+            background: #fff;
+            color: var(--ink);
+            font: 1rem Georgia, 'Times New Roman', serif;
+        }
+
+        input[type="text"]:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+        button { border: 0; cursor: pointer; font: 700 0.82rem Arial, sans-serif; }
+        .add-button { padding: 0 18px; color: #fff; background: var(--accent); }
+        .add-button:hover { background: var(--accent-dark); }
+
+        .summary {
+            display: flex;
+            justify-content: space-between;
+            margin: 0 0 10px;
+            color: var(--muted);
+            font: 0.75rem Arial, sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .task-list { list-style: none; margin: 0; padding: 0; }
+        .task {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 62px;
+            border-top: 1px solid var(--line);
+        }
+
+        .task label { display: flex; align-items: center; flex: 1; gap: 12px; min-width: 0; }
+        .task input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--green); cursor: pointer; }
+        .task-text { overflow-wrap: anywhere; font-size: 1.08rem; }
+        .task.completed .task-text { color: var(--muted); text-decoration: line-through; }
+
+        .task-actions { display: flex; gap: 4px; }
+        .task-actions button { padding: 7px 8px; color: var(--muted); background: transparent; }
+        .task-actions button:hover:not(:disabled) { color: var(--accent-dark); background: #f8eee7; }
+        .task-actions button:disabled { cursor: not-allowed; opacity: 0.25; }
+        .delete-button { color: var(--accent-dark) !important; }
+        .empty { padding: 32px 0; color: var(--muted); text-align: center; font-style: italic; }
+
+        @media (max-width: 520px) {
+            .app { margin: 20px auto; box-shadow: 8px 8px 0 #ded6c7; }
+            .add-task { flex-direction: column; }
+            .add-button { min-height: 44px; }
+            .task { align-items: flex-start; padding: 14px 0; }
+            .task-actions { margin-left: 30px; }
+        }
+    </style>
+</head>
+<body>
+    <main class="app">
+        <header>
+            <p class="eyebrow">A little order for the day</p>
+            <h1>Today</h1>
+            <p class="intro">Write it down. Do the next right thing.</p>
+        </header>
+
+        <form class="add-task" id="task-form">
+            <input id="task-input" type="text" placeholder="What needs doing?" autocomplete="off" aria-label="New task">
+            <button class="add-button" type="submit">Add task</button>
+        </form>
+
+        <div class="summary">
+            <span id="task-count">0 tasks</span>
+            <span id="completed-count">0 complete</span>
+        </div>
+        <ul class="task-list" id="task-list"></ul>
+    </main>
+
+    <script>
+        const form = document.querySelector('#task-form');
+        const input = document.querySelector('#task-input');
+        const taskList = document.querySelector('#task-list');
+        const taskCount = document.querySelector('#task-count');
+        const completedCount = document.querySelector('#completed-count');
+        let tasks = [
+            { text: 'Make a short, honest plan', completed: false },
+            { text: 'Finish one important thing', completed: false },
+            { text: 'Leave room for a good surprise', completed: true }
+        ];
+
+        function renderTasks() {
+            taskList.innerHTML = '';
+            tasks.forEach((task, index) => {
+                const item = document.createElement('li');
+                item.className = `task${task.completed ? ' completed' : ''}`;
+                item.innerHTML = `
+                    <label>
+                        <input type="checkbox" ${task.completed ? 'checked' : ''} aria-label="Mark ${escapeHtml(task.text)} complete">
+                        <span class="task-text"></span>
+                    </label>
+                    <div class="task-actions">
+                        <button type="button" data-action="up" aria-label="Move task up" ${index === 0 ? 'disabled' : ''}>↑</button>
+                        <button type="button" data-action="down" aria-label="Move task down" ${index === tasks.length - 1 ? 'disabled' : ''}>↓</button>
+                        <button class="delete-button" type="button" data-action="delete" aria-label="Delete task">×</button>
+                    </div>`;
+                item.querySelector('.task-text').textContent = task.text;
+                item.querySelector('input').addEventListener('change', () => {
+                    tasks[index].completed = !tasks[index].completed;
+                    renderTasks();
+                });
+                item.querySelectorAll('button').forEach(button => {
+                    button.addEventListener('click', () => updateTask(index, button.dataset.action));
+                });
+                taskList.appendChild(item);
+            });
+            taskList.querySelector('.empty') || (tasks.length === 0 && (taskList.innerHTML = '<li class="empty">Nothing here yet. Add your first task.</li>'));
+            const completed = tasks.filter(task => task.completed).length;
+            taskCount.textContent = `${tasks.length} ${tasks.length === 1 ? 'task' : 'tasks'}`;
+            completedCount.textContent = `${completed} complete`;
+        }
+
+        function updateTask(index, action) {
+            if (action === 'delete') tasks.splice(index, 1);
+            if (action === 'up' && index > 0) [tasks[index - 1], tasks[index]] = [tasks[index], tasks[index - 1]];
+            if (action === 'down' && index < tasks.length - 1) [tasks[index + 1], tasks[index]] = [tasks[index], tasks[index + 1]];
+            renderTasks();
+        }
+
+        function escapeHtml(value) {
+            return value.replace(/[&<>'"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character]));
+        }
+
+        form.addEventListener('submit', event => {
+            event.preventDefault();
+            const text = input.value.trim();
+            if (!text) return;
+            tasks.push({ text, completed: false });
+            input.value = '';
+            renderTasks();
+            input.focus();
+        });
+
+        renderTasks();
+    </script>
+</body>
+</html>
